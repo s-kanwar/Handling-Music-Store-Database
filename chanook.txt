@@ -1,0 +1,63 @@
+//To count total number of artist
+SELECT a.name, count(t.trackId)
+FROM ALbum ab
+JOIN Artist a
+ON a.ArtistId = ab.ArtistId
+JOIN Track t
+ON t.AlbumId = ab.albumId
+GROUP BY a.name
+ORDER BY count(t.trackId) DESC
+LIMIT 10;
+
+//Total munites played in each country
+SELECT c.Country, sum(t.Milliseconds/60) As Total_Minutes_Played
+FROM Track t
+JOIN InvoiceLine Il
+ON Il.TrackId = t.TrackId
+JOIN Invoice 
+ON Il.InvoiceId = Invoice.InvoiceId
+JOIN Customer c
+ON Invoice.CustomerId = c.CustomerId
+GROUP BY c.Country
+ORDER BY Total_Minutes_Played DESC;
+
+//Most listened to genre
+
+SELECT g.Name, sum(t.Milliseconds/60) As Total_Minutes_Played
+FROM Track t
+JOIN Genre g
+ON t.GenreId = g.GenreId
+JOIN InvoiceLine Il
+ON Il.TrackId = t.TrackId
+JOIN Invoice 
+ON Il.InvoiceId = Invoice.InvoiceId
+JOIN Customer c
+ON Invoice.CustomerId = c.CustomerId
+GROUP BY g.Name
+ORDER BY Total_Minutes_Played DESC; 
+
+//To Know which Artist earned the most
+SELECT a.Name, q3.Artist_Earning
+FROM Artist a
+	JOIN(SELECT ab.ArtistId, sum(q2.Album_Earning) as Artist_Earning
+	FROM Album ab
+	JOIN (SELECT  t.AlbumId, sum(q1.Price) as Album_Earning
+		FROM Track t
+			INNER JOIN (SELECT TrackId, sum(UnitPrice*Quantity) as Price
+			FROM InvoiceLine
+			GROUP BY TrackId) AS q1
+		ON t.TrackId = q1.TrackId
+		GROUP BY t.AlbumId) as q2
+	ON ab.AlbumId = q2.AlbumId
+	GROUP BY ab.ArtistId) as q3
+ON a.ArtistId = q3.ArtistId
+GROUP BY A.name
+ORDER BY q3.Artist_Earning DESC
+LIMIT 10;
+
+//To Check number of customers assigned to each employee
+SELECT e.EmployeeId, count(c.CustomerId) as Assigned_Customers
+FROM Customer c
+JOIN employee e
+ON c.SupportRepId = e.EmployeeId
+GROUP BY e.EmployeeId;
